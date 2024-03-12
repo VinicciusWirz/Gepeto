@@ -1,13 +1,10 @@
 import { styled } from "styled-components";
-import { FiThumbsDown, FiThumbsUp } from "react-icons/fi";
 import { BsSend } from "react-icons/bs";
-import gepeto from "./assets/gepeto.png";
-import user from "./assets/user.png";
 import { useState } from "react";
-import axios from "axios";
 import dayjs from "dayjs";
 import { ChatItem, Question } from "./types";
 import apiGepeto from "./services/apiGepeto";
+import ChatElement from "./components/ChatElement";
 
 function App() {
   const [chat, setChat] = useState<ChatItem[]>([]);
@@ -56,30 +53,9 @@ function App() {
 
   return (
     <MainFrame>
-      <QuestionFrame>
-        <ImgContainer src={user}></ImgContainer>
-        <section>
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum."
-        </section>
-        <RateContainer>
-          <FiThumbsUp />
-          <FiThumbsDown />
-        </RateContainer>
-      </QuestionFrame>
-      <AnswerFrame>
-        <ImgContainer src={gepeto}></ImgContainer>
-        <section>sim</section>
-        <RateContainer>
-          <FiThumbsUp />
-          <FiThumbsDown />
-        </RateContainer>
-      </AnswerFrame>
+      {chat.map((e: ChatItem, index: number) => (
+        <ChatElement key={index} chatItem={e} />
+      ))}
 
       <Loading loading={loading ? "150px" : "0px"}>
         <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbHExbHc2aXBnZThiMmM1MjNuOHdkYW4zemM4MWo4MG91d2F5NTJmcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/s3ZQU8rdnv9oIlzsaJ/giphy.gif" />
@@ -111,43 +87,6 @@ const MainFrame = styled.main`
   flex-direction: column;
   justify-content: end;
   align-itens: center;
-`;
-
-const QuestionFrame = styled.div`
-  padding: 24px 48px;
-  background: #343541;
-  display: flex;
-  justify-content: space-between;
-  section {
-    width: 100%;
-  }
-`;
-
-const AnswerFrame = styled.div`
-  padding: 24px 48px;
-  display: flex;
-  justify-content: space-between;
-  section {
-    width: 100%;
-  }
-`;
-
-const ImgContainer = styled.img`
-  width: 30px;
-  height: 30px;
-  border-radius: 2px;
-  margin-right: 24px;
-`;
-
-const RateContainer = styled.div`
-  margin-left: 24px;
-  display: flex;
-  svg:first-child {
-    margin-right: 12px;
-  }
-  svg {
-    cursor: pointer;
-  }
 `;
 
 const Footer = styled.div`
@@ -189,6 +128,7 @@ const Footer = styled.div`
     }
   }
 `;
+
 const SendIcon = styled.div`
   position: absolute;
   right: 48px;
@@ -196,7 +136,7 @@ const SendIcon = styled.div`
   cursor: pointer;
 `;
 
-const Loading = styled.div`
+const Loading = styled.div<{ loading: string }>`
   display: flex;
   justify-content: center;
   transition: height 1500ms;
@@ -209,9 +149,6 @@ const Loading = styled.div`
     width: 150px;
     height: 150px;
     object-fit: cover;
-  }
-  &:hover {
-    height: 0px;
   }
 `;
 
