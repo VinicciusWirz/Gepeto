@@ -12,11 +12,10 @@ function App() {
   const [loading, setLoading] = useState<boolean>(false);
 
   function listenKeyDown(e: React.KeyboardEvent) {
-    if (loading) return;
-    if (e.ctrlKey && e.key === "Enter") {
-      setForm({ question: form.question + "\n" });
-    }
-    if (e.key === "Enter" && !e.ctrlKey) {
+    if (loading || !form.question.length || (e.shiftKey && e.key === "Enter"))
+      return;
+
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       submitQuestion();
     }
@@ -31,7 +30,7 @@ function App() {
 
     const protocol: Question = {
       question: form.question,
-      questionDate,
+      date: questionDate,
     };
     setForm({ question: "" });
     const updateChat = [...chat, protocol];
@@ -41,11 +40,19 @@ function App() {
       const { data } = await apiGepeto.sendQuestion(form.question);
       const answerProtocol = {
         answer: data.answer,
-        answerDate: dayjs(data.answeredAt).format("DD/MM/YYYY HH:MM"),
+        date: dayjs(data.answeredAt).format("DD/MM/YYYY HH:MM"),
       };
 
       setChat([...updateChat, answerProtocol]);
     } catch (error) {
+      setChat([
+        ...updateChat,
+        {
+          answer:
+            "algo deu de errado com o servidor, porfavor aguarde um momento",
+          date: dayjs().format("DD/MM/YYYY HH:MM"),
+        },
+      ]);
       console.log(error);
     }
     setLoading(false);
@@ -53,14 +60,17 @@ function App() {
 
   return (
     <MainFrame>
-      {chat.map((e: ChatItem, index: number) => (
-        <ChatElement key={index} chatItem={e} />
-      ))}
-
-      <Loading loading={loading ? "150px" : "0px"}>
-        <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbHExbHc2aXBnZThiMmM1MjNuOHdkYW4zemM4MWo4MG91d2F5NTJmcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/s3ZQU8rdnv9oIlzsaJ/giphy.gif" />
-      </Loading>
-
+      <ChatHolder>
+        {chat.map((e: ChatItem, index: number) => (
+          <ChatElement
+            key={`${index} ${e.date}`}
+            chatItem={e}
+          />
+        ))}
+        <Loading loading={loading ? "150px" : "0px"}>
+          <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbHExbHc2aXBnZThiMmM1MjNuOHdkYW4zemM4MWo4MG91d2F5NTJmcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/s3ZQU8rdnv9oIlzsaJ/giphy.gif" />
+        </Loading>
+      </ChatHolder>
       <Footer>
         <textarea
           value={form.question}
@@ -92,7 +102,8 @@ const MainFrame = styled.main`
 const Footer = styled.div`
   padding: 24px 48px;
   background: #343541;
-  position: relative;
+  position: fixed;
+  width: 100vw;
   textarea {
     &:disabled {
       filter: brightness(85%);
@@ -107,9 +118,9 @@ const Footer = styled.div`
     width: 100%;
     border-radius: 6px;
     min-height: 50px;
-    padding-top: 5px;
     resize: none;
-    padding-right: 20px;
+    padding: 5px 25px;
+    padding-right: 50px;
     &::-webkit-scrollbar {
       width: 10px;
       background: #8888880;
@@ -131,9 +142,10 @@ const Footer = styled.div`
 
 const SendIcon = styled.div`
   position: absolute;
-  right: 48px;
+  right: 50px;
   top: 44px;
   cursor: pointer;
+  width: 30px;
 `;
 
 const Loading = styled.div<{ loading: string }>`
@@ -149,6 +161,16 @@ const Loading = styled.div<{ loading: string }>`
     width: 150px;
     height: 150px;
     object-fit: cover;
+  }
+`;
+
+const ChatHolder = styled.div`
+  padding-bottom: 110px;
+  width: 100%;
+
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    display: none;
   }
 `;
 

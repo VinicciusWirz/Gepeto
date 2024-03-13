@@ -1,11 +1,11 @@
 export interface Question {
   question: string;
-  questionDate: string;
+  date: string;
 }
 
 interface Answer {
   answer: string;
-  answerDate: string;
+  date: string;
 }
 
 export type ChatItem = Question | Answer;
