@@ -4,33 +4,39 @@ import gepeto from "../assets/gepeto.png";
 import user from "../assets/user.png";
 import { FiThumbsDown, FiThumbsUp } from "react-icons/fi";
 import styled from "styled-components";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ChatItem } from "../types";
 
-function ChatElement(props: Readonly<{ chatItem: ChatItem }>) {
+function ChatElement(
+  props: Readonly<{
+    chatItem: ChatItem;
+  }>
+) {
+  const { chatItem } = props;
   const [isHover, setIsHover] = useState<boolean>(false);
   const [text, setText] = useState<string>("");
-  const textRef = useRef<HTMLDivElement>(null);
-  const content: { text: string; date: string; background: string | false } = {
+  const content: { text: string; date: string; background: string } = {
     text: "",
-    date: props.chatItem.date,
-    background: false,
+    date: chatItem.date,
+    background: "",
   };
+  const chatRef = useRef<HTMLDivElement>(null);
 
-  if ("question" in props.chatItem) {
-    content.text = props.chatItem.question;
+  if ("question" in chatItem) {
+    content.text = chatItem.question;
     content.background = "#343541";
   } else {
-    content.text = props.chatItem.answer;
+    content.text = chatItem.answer;
+    content.background = "transparent";
   }
 
   useEffect(() => {
-    if (textRef.current) {
-      textRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
-    }
-
     let currentIndex = 0;
     const intervalLetters = 20;
+    if ("question" in chatItem) {
+      setText(content.text);
+      return;
+    }
 
     const intervalId = setInterval(() => {
       if (currentIndex <= content.text.length) {
@@ -38,8 +44,8 @@ function ChatElement(props: Readonly<{ chatItem: ChatItem }>) {
         currentIndex++;
       } else {
         clearInterval(intervalId);
-        if (textRef.current) {
-          textRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+        if (chatRef.current) {
+          chatRef.current.scrollIntoView({ behavior: "smooth" });
         }
       }
     }, intervalLetters);
@@ -48,29 +54,38 @@ function ChatElement(props: Readonly<{ chatItem: ChatItem }>) {
 
   return (
     <Frame
-      background={content.background}
+      frameBackground={content.background}
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
-      ref={textRef}
+      ref={chatRef}
     >
-      <ImgContainer src={content.background ? user : gepeto}></ImgContainer>
+      <ImgContainer
+        src={content.background !== "transparent" ? user : gepeto}
+      ></ImgContainer>
       <section>
-        <p>{text}</p>
+        <p>
+          {text.split(/\\n/i).map((line, index) => (
+            <React.Fragment key={`${index}${line}`}>
+              {line}
+              <br />
+            </React.Fragment>
+          ))}
+        </p>
       </section>
       <RateContainer>
         <Icons>
           <FiThumbsUp />
           <FiThumbsDown />
         </Icons>
-        <DateContainer hover={isHover}>{content.date}</DateContainer>
+        <DateContainer isHovering={isHover}>{content.date}</DateContainer>
       </RateContainer>
     </Frame>
   );
 }
 
-const Frame = styled.div<{ background: string | false }>`
+const Frame = styled.div<{ frameBackground: string | false }>`
   padding: 24px 48px;
-  background: ${(props) => props.background};
+  background: ${(props) => props.frameBackground};
   display: flex;
   justify-content: space-between;
   width: 100%;
@@ -84,6 +99,7 @@ const Frame = styled.div<{ background: string | false }>`
       text-wrap: wrap;
       width: 100%;
       word-break: break-word;
+      white-space: pre-wrap;
     }
   }
 `;
@@ -114,9 +130,9 @@ const Icons = styled.div`
   }
 `;
 
-const DateContainer = styled.div<{ hover: boolean }>`
+const DateContainer = styled.div<{ isHovering: boolean }>`
   font-size: 12px;
-  display: ${(props) => (props.hover ? "flex" : "none")};
+  display: ${(props) => (props.isHovering ? "flex" : "none")};
   flex-direction: column;
   line-height: 16px;
   margin-top: 5px;

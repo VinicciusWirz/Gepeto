@@ -1,6 +1,6 @@
 import { styled } from "styled-components";
 import { BsSend } from "react-icons/bs";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import dayjs from "dayjs";
 import { ChatItem, Question } from "./types";
 import apiGepeto from "./services/apiGepeto";
@@ -10,6 +10,7 @@ function App() {
   const [chat, setChat] = useState<ChatItem[]>([]);
   const [form, setForm] = useState<{ question: string }>({ question: "" });
   const [loading, setLoading] = useState<boolean>(false);
+  const loadingRef = useRef<HTMLDivElement>(null);
 
   function listenKeyDown(e: React.KeyboardEvent) {
     if (loading || !form.question.length || (e.shiftKey && e.key === "Enter"))
@@ -36,6 +37,12 @@ function App() {
     const updateChat = [...chat, protocol];
     setChat(updateChat);
 
+    setTimeout(() => {
+      if (loadingRef.current) {
+        loadingRef.current.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 1600);
+
     try {
       const { data } = await apiGepeto.sendQuestion(form.question);
       const answerProtocol = {
@@ -49,7 +56,7 @@ function App() {
         ...updateChat,
         {
           answer:
-            "algo deu de errado com o servidor, porfavor aguarde um momento",
+            "Algo deu de errado com o servidor, porfavor aguarde um momento",
           date: dayjs().format("DD/MM/YYYY HH:MM"),
         },
       ]);
@@ -62,13 +69,13 @@ function App() {
     <MainFrame>
       <ChatHolder>
         {chat.map((e: ChatItem, index: number) => (
-          <ChatElement
-            key={`${index} ${e.date}`}
-            chatItem={e}
-          />
+          <ChatElement key={`${index} ${e.date}`} chatItem={e} />
         ))}
-        <Loading loading={loading ? "150px" : "0px"}>
-          <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbHExbHc2aXBnZThiMmM1MjNuOHdkYW4zemM4MWo4MG91d2F5NTJmcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/s3ZQU8rdnv9oIlzsaJ/giphy.gif" />
+        <Loading loading={loading ? "150px" : "0px"} ref={loadingRef}>
+          <img
+            src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbHExbHc2aXBnZThiMmM1MjNuOHdkYW4zemM4MWo4MG91d2F5NTJmcSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/s3ZQU8rdnv9oIlzsaJ/giphy.gif"
+            alt="loading-gif"
+          />
         </Loading>
       </ChatHolder>
       <Footer>
