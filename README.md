@@ -21,6 +21,7 @@ The following tools and frameworks were used in the construction of the project:
 <details>
   <summary>2. Backend Setup</summary>
   2.1 Open a terminal on ./gepeto-express
+
   2.2 Install dependencies
   
 ```bash
@@ -43,7 +44,7 @@ gepeto-express/
 ├── package.json
 ├── .gitignore
 └── package-lock.json
-```
+``` 
 2.5 Build the backend server with:
 ```bash
 npm run build
@@ -54,19 +55,20 @@ npm start
 <details>
   <summary>3. Frontend Setup</summary>
   3.1 Open a terminal on ./gepeto-react
+
   3.2 Install dependencies
   
 ```bash
   npm i
 ```
-  3.4 Setup the .env file following the .env.example (reminder: the backend will start by default on port 8080)
+  3.3 Setup the .env file following the .env.example (reminder: the backend will start by default on port 8080)
   
 ```env
 # .env example for running locally:
 VITE_REACT_APP_API=http://localhost:8080/
 ```
 
-  3.5 Run the project using
+  3.4 Run the project using
 ```bash
 npm run dev
 ```
